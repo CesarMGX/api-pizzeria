@@ -11,7 +11,7 @@ const options = {
     servers: [
       {
         url: process.env.BACKEND_URL || 'https://api-pizzeria-production.up.railway.app',
-        description: 'Servidor Configurado (BACKEND_URL)',
+        description: 'Servidor Configurado',
       },
       {
         url: 'https://api-pizzeria-production.up.railway.app',

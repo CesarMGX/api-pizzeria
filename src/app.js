@@ -9,6 +9,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import promoRoutes from './routes/promoRoutes.js';
 import { protect } from './middlewares/authMiddleware.js';
 
 
@@ -37,6 +38,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/pizzas', protect, pizzaRoutes);
 app.use('/api/catalog', protect, catalogRoutes);
 app.use('/api/orders', protect, orderRoutes);
+app.use('/api/promos', protect, promoRoutes);
 app.use('/api/upload', protect, uploadRoutes);
 app.use('/api/payments', protect, paymentRoutes);
 
