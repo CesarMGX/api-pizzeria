@@ -14,10 +14,6 @@ const options = {
         description: 'Servidor Configurado',
       },
       {
-        url: 'https://api-pizzeria-production.up.railway.app',
-        description: 'Servidor de Producción (Railway)',
-      },
-      {
         url: 'http://localhost:3001',
         description: 'Servidor de Desarrollo Local',
       },
