@@ -10,8 +10,16 @@ const options = {
     },
     servers: [
       {
-        url: process.env.BACKEND_URL || 'http://localhost:3001',
-        description: 'Servidor Local',
+        url: process.env.BACKEND_URL || 'https://api-pizzeria-production.up.railway.app',
+        description: 'Servidor Configurado (BACKEND_URL)',
+      },
+      {
+        url: 'https://api-pizzeria-production.up.railway.app',
+        description: 'Servidor de Producción (Railway)',
+      },
+      {
+        url: 'http://localhost:3001',
+        description: 'Servidor de Desarrollo Local',
       },
     ],
     components: {
