@@ -37,9 +37,9 @@ export const connectDB = async () => {
     await sequelize.authenticate();
     console.log('PostgreSQL Conectado exitosamente.');
     
-    // Sincronización automática de modelos en desarrollo (deshabilitado a petición del usuario)
-    // await sequelize.sync({ alter: true });
-    // console.log('Tablas de PostgreSQL sincronizadas correctamente.');
+    // Sincronización automática de modelos (crea las tablas si no existen)
+    await sequelize.sync();
+    console.log('Tablas de PostgreSQL sincronizadas correctamente.');
   } catch (error) {
     console.error(`Error de conexión o sincronización a PostgreSQL: ${error.message}`);
     console.warn('Advertencia: El servidor continuará ejecutándose para permitir el acceso a la documentación (Swagger) sin una base de datos activa.');
