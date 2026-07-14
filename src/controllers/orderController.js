@@ -151,13 +151,23 @@ export const getOrderById = async (req, res) => {
  *                 type: string
  *                 enum: [Efectivo, MercadoPago]
  *                 example: Efectivo
- *               nombreCliente:
+ *               clienteNombre:
  *                 type: string
- *                 example: adán de Jesús
- *               emailCliente:
+ *                 example: Adán de Jesús
+ *               clienteEmail:
  *                 type: string
  *                 format: email
- *                 example: test_user@testuser.com
+ *                 example: adandejesus200420@gmail.com
+ *               clienteTelefono:
+ *                 type: string
+ *                 example: "2712917011"
+ *               pickupCode:
+ *                 type: string
+ *                 example: "PK-1234"
+ *               userId:
+ *                 type: string
+ *                 format: uuid
+ *                 example: "d3b07384-d113-4c9f-855f-863a48e77a28"
  *     responses:
  *       201:
  *         description: Orden creada exitosamente
@@ -170,11 +180,24 @@ export const getOrderById = async (req, res) => {
  */
 export const createOrder = async (req, res) => {
   try {
-    const { items, total, metodoPago, nombreCliente, emailCliente } = req.body;
+    const { 
+      items, 
+      total, 
+      metodoPago, 
+      clienteNombre, 
+      clienteEmail, 
+      clienteTelefono, 
+      pickupCode, 
+      userId 
+    } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ message: 'La orden debe contener al menos un producto' });
     }
+
+    // Compatibilidad hacia atrás
+    const finalNombre = clienteNombre || req.body.nombreCliente || '';
+    const finalEmail = clienteEmail || req.body.emailCliente || '';
 
     // Generación de número de orden consecutivo
     const count = await Order.count();
@@ -197,8 +220,11 @@ export const createOrder = async (req, res) => {
       status: 'Pendiente',
       paymentStatus: 'pending',
       metodoPago: metodoPago || 'Efectivo',
-      nombreCliente: nombreCliente || null,
-      emailCliente: emailCliente || null,
+      clienteNombre: finalNombre,
+      clienteEmail: finalEmail,
+      clienteTelefono: clienteTelefono || '',
+      pickupCode: pickupCode || null,
+      userId: userId || null,
     });
 
     res.status(201).json(order);
@@ -309,13 +335,23 @@ export const updateOrderStatus = async (req, res) => {
  *                 type: string
  *                 enum: [Efectivo, MercadoPago]
  *                 example: MercadoPago
- *               nombreCliente:
+ *               clienteNombre:
  *                 type: string
- *                 example: adán de Jesús
- *               emailCliente:
+ *                 example: Adán de Jesús
+ *               clienteEmail:
  *                 type: string
  *                 format: email
- *                 example: test_user@testuser.com
+ *                 example: adandejesus200420@gmail.com
+ *               clienteTelefono:
+ *                 type: string
+ *                 example: "2712917011"
+ *               pickupCode:
+ *                 type: string
+ *                 example: "PK-1234"
+ *               userId:
+ *                 type: string
+ *                 format: uuid
+ *                 example: "d3b07384-d113-4c9f-855f-863a48e77a28"
  *     responses:
  *       200:
  *         description: Orden actualizada correctamente
@@ -340,8 +376,11 @@ export const updateOrder = async (req, res) => {
     order.status = req.body.status || order.status;
     order.paymentStatus = req.body.paymentStatus || order.paymentStatus;
     order.metodoPago = req.body.metodoPago || order.metodoPago;
-    order.nombreCliente = req.body.nombreCliente || order.nombreCliente;
-    order.emailCliente = req.body.emailCliente || order.emailCliente;
+    order.clienteNombre = req.body.clienteNombre || req.body.nombreCliente || order.clienteNombre;
+    order.clienteEmail = req.body.clienteEmail || req.body.emailCliente || order.clienteEmail;
+    order.clienteTelefono = req.body.clienteTelefono !== undefined ? req.body.clienteTelefono : order.clienteTelefono;
+    order.pickupCode = req.body.pickupCode || order.pickupCode;
+    order.userId = req.body.userId || order.userId;
     
     if (req.body.total !== undefined) {
       order.total = req.body.total;
@@ -469,8 +508,8 @@ export const getOrderComprobante = async (req, res) => {
 
     // Cliente
     const cliente = {
-      nombre: order.nombreCliente || 'Test Test',
-      email: order.emailCliente || 'test_user_7841552200297713870@testuser.com'
+      nombre: order.clienteNombre || order.nombreCliente || 'Test Test',
+      email: order.clienteEmail || order.emailCliente || 'test_user_7841552200297713870@testuser.com'
     };
 
     // QR Data

@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.js';
+import User from './User.js';
 
 const Order = sequelize.define('Order', {
   id: {
@@ -11,6 +12,21 @@ const Order = sequelize.define('Order', {
     type: DataTypes.STRING(20),
     allowNull: false,
     unique: true,
+  },
+  clienteNombre: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    defaultValue: '',
+  },
+  clienteTelefono: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    defaultValue: '',
+  },
+  clienteEmail: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    defaultValue: '',
   },
   items: {
     type: DataTypes.JSON, // Almacena el array de CartItem de forma serializada en formato JSON
@@ -33,21 +49,13 @@ const Order = sequelize.define('Order', {
   },
   paymentStatus: {
     type: DataTypes.STRING(50),
-    allowNull: false,
+    allowNull: true,
     defaultValue: 'pending',
   },
   metodoPago: {
     type: DataTypes.STRING(50),
     allowNull: false,
     defaultValue: 'Efectivo',
-  },
-  nombreCliente: {
-    type: DataTypes.STRING(100),
-    allowNull: true,
-  },
-  emailCliente: {
-    type: DataTypes.STRING(150),
-    allowNull: true,
   },
   paymentId: {
     type: DataTypes.STRING(100),
@@ -56,6 +64,18 @@ const Order = sequelize.define('Order', {
   preferenceId: {
     type: DataTypes.STRING(100),
     allowNull: true,
+  },
+  pickupCode: {
+    type: DataTypes.STRING(10),
+    allowNull: true,
+  },
+  userId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: {
+      model: User,
+      key: 'id',
+    },
   },
   time: {
     type: DataTypes.STRING(50),
@@ -67,5 +87,9 @@ const Order = sequelize.define('Order', {
     defaultValue: () => Date.now(),
   },
 });
+
+// Relaciones
+Order.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+User.hasMany(Order, { foreignKey: 'userId', as: 'orders' });
 
 export default Order;

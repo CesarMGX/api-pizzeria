@@ -8,33 +8,57 @@ const User = sequelize.define('User', {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
-  correo: {
-    type: DataTypes.STRING(150),
+  nombre: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+  },
+  apellido: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    defaultValue: '',
+  },
+  email: {
+    type: DataTypes.STRING(100),
     allowNull: false,
     unique: true,
     validate: {
       isEmail: true,
     },
   },
-  contrasena: {
+  password: {
     type: DataTypes.STRING(255),
     allowNull: false,
+  },
+  rol: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+    defaultValue: 'cliente',
+  },
+  telefono: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    defaultValue: '',
+  },
+  recibePromos: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
   },
 }, {
   hooks: {
     beforeCreate: async (user) => {
-      user.contrasena = await bcrypt.hash(user.contrasena, 10);
+      user.password = await bcrypt.hash(user.password, 10);
     },
     beforeUpdate: async (user) => {
-      if (user.changed('contrasena')) {
-        user.contrasena = await bcrypt.hash(user.contrasena, 10);
+      if (user.changed('password')) {
+        user.password = await bcrypt.hash(user.password, 10);
       }
     },
   }
 });
 
 User.prototype.validarContrasena = async function (contrasena) {
-  return await bcrypt.compare(contrasena, this.contrasena);
+  return await bcrypt.compare(contrasena, this.password);
 };
 
 export default User;

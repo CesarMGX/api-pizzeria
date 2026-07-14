@@ -110,17 +110,22 @@ const seedDatabase = async () => {
 
     // 1. Insertar Usuario por defecto
     const defaultUser = {
-      correo: 'admin@planetpizza.com',
-      contrasena: 'pizzaplaneta123921_xdd'
+      nombre: 'Adán de Jesús',
+      apellido: 'Morales',
+      email: 'adandejesus200420@gmail.com',
+      password: 'pizzaplaneta123921_xdd',
+      rol: 'admin',
+      telefono: '2712917011',
+      recibePromos: true
     };
     const [userRecord, userCreated] = await User.findOrCreate({
-      where: { correo: defaultUser.correo },
+      where: { email: defaultUser.email },
       defaults: defaultUser,
     });
     if (userCreated) {
-      console.log(`Usuario por defecto creado: ${defaultUser.correo}`);
+      console.log(`Usuario por defecto creado: ${defaultUser.email}`);
     } else {
-      console.log(`El usuario ya existe: ${defaultUser.correo}`);
+      console.log(`El usuario ya existe: ${defaultUser.email}`);
     }
 
     // 2. Insertar Tamaños

@@ -7,18 +7,34 @@ import User from '../models/User.js';
  *     User:
  *       type: object
  *       required:
- *         - correo
+ *         - nombre
+ *         - email
  *       properties:
  *         id:
  *           type: string
  *           format: uuid
  *           description: ID único autogenerado (UUID)
  *           example: d3b07384-d113-4c9f-855f-863a48e77a28
- *         correo:
+ *         nombre:
+ *           type: string
+ *           example: Adán de Jesús
+ *         apellido:
+ *           type: string
+ *           example: Morales
+ *         email:
  *           type: string
  *           format: email
  *           description: Correo electrónico único del usuario
- *           example: admin@planetpizza.com
+ *           example: adandejesus200420@gmail.com
+ *         rol:
+ *           type: string
+ *           example: admin
+ *         telefono:
+ *           type: string
+ *           example: "2712917011"
+ *         recibePromos:
+ *           type: boolean
+ *           example: true
  */
 
 /**
@@ -46,7 +62,7 @@ import User from '../models/User.js';
 export const getUsers = async (req, res) => {
   try {
     const users = await User.findAll({
-      attributes: ['id', 'correo', 'createdAt', 'updatedAt']
+      attributes: ['id', 'nombre', 'apellido', 'email', 'rol', 'telefono', 'recibePromos', 'createdAt', 'updatedAt']
     });
     res.json(users);
   } catch (error) {
@@ -88,7 +104,7 @@ export const getUsers = async (req, res) => {
 export const getUserById = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id, {
-      attributes: ['id', 'correo', 'createdAt', 'updatedAt']
+      attributes: ['id', 'nombre', 'apellido', 'email', 'rol', 'telefono', 'recibePromos', 'createdAt', 'updatedAt']
     });
     if (user) {
       res.json(user);
@@ -115,16 +131,32 @@ export const getUserById = async (req, res) => {
  *           schema:
  *             type: object
  *             required:
- *               - correo
- *               - contrasena
+ *               - nombre
+ *               - email
+ *               - password
  *             properties:
- *               correo:
+ *               nombre:
+ *                 type: string
+ *                 example: Adán de Jesús
+ *               apellido:
+ *                 type: string
+ *                 example: Morales
+ *               email:
  *                 type: string
  *                 format: email
- *                 example: empleado@planetpizza.com
- *               contrasena:
+ *                 example: adandejesus200420@gmail.com
+ *               password:
  *                 type: string
- *                 example: empleado123
+ *                 example: a1b2c3d4e5f6
+ *               rol:
+ *                 type: string
+ *                 example: admin
+ *               telefono:
+ *                 type: string
+ *                 example: "2712917011"
+ *               recibePromos:
+ *                 type: boolean
+ *                 example: true
  *     responses:
  *       201:
  *         description: Usuario creado exitosamente
@@ -138,24 +170,43 @@ export const getUserById = async (req, res) => {
  *         description: No autorizado
  */
 export const createUser = async (req, res, next) => {
-  const { correo, contrasena } = req.body;
+  const { nombre, apellido, email, password, rol, telefono, recibePromos } = req.body;
 
-  if (!correo || !contrasena) {
+  // Soporte de fallback de compatibilidad
+  const finalEmail = email || req.body.correo;
+  const finalPassword = password || req.body.contrasena;
+  const finalNombre = nombre || 'Usuario';
+
+  if (!finalEmail || !finalPassword) {
     res.status(400);
-    return next(new Error('Por favor, proporciona un correo y una contraseña'));
+    return next(new Error('Por favor, proporciona un email y una contraseña'));
   }
 
   try {
-    const usuarioExiste = await User.findOne({ where: { correo } });
+    const usuarioExiste = await User.findOne({ where: { email: finalEmail } });
     if (usuarioExiste) {
       res.status(400);
       return next(new Error('Este correo ya se encuentra registrado'));
     }
 
-    const user = await User.create({ correo, contrasena });
+    const user = await User.create({
+      nombre: finalNombre,
+      apellido: apellido || '',
+      email: finalEmail,
+      password: finalPassword,
+      rol: rol || 'cliente',
+      telefono: telefono || '',
+      recibePromos: recibePromos !== undefined ? recibePromos : false
+    });
+
     res.status(201).json({
       id: user.id,
-      correo: user.correo,
+      nombre: user.nombre,
+      apellido: user.apellido,
+      email: user.email,
+      rol: user.rol,
+      telefono: user.telefono,
+      recibePromos: user.recibePromos,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt
     });
@@ -169,7 +220,7 @@ export const createUser = async (req, res, next) => {
  * @swagger
  * /api/users/{id}:
  *   put:
- *     summary: Actualizar un usuario existente (correo y/o contraseña)
+ *     summary: Actualizar un usuario existente
  *     tags: [Usuarios]
  *     security:
  *       - bearerAuth: []
@@ -189,14 +240,29 @@ export const createUser = async (req, res, next) => {
  *           schema:
  *             type: object
  *             properties:
- *               correo:
+ *               nombre:
+ *                 type: string
+ *                 example: Adán de Jesús Modificado
+ *               apellido:
+ *                 type: string
+ *                 example: Morales
+ *               email:
  *                 type: string
  *                 format: email
- *                 example: empleado_nuevo@planetpizza.com
- *               contrasena:
+ *                 example: adandejesus_nuevo@gmail.com
+ *               password:
  *                 type: string
  *                 description: Nueva contraseña de acceso si se desea cambiar
  *                 example: nuevacontrasena123
+ *               rol:
+ *                 type: string
+ *                 example: empleado
+ *               telefono:
+ *                 type: string
+ *                 example: "2712917012"
+ *               recibePromos:
+ *                 type: boolean
+ *                 example: false
  *     responses:
  *       200:
  *         description: Usuario actualizado exitosamente
@@ -219,23 +285,36 @@ export const updateUser = async (req, res, next) => {
       return next(new Error('Usuario no encontrado'));
     }
 
-    if (req.body.correo && req.body.correo !== user.correo) {
-      const usuarioExiste = await User.findOne({ where: { correo: req.body.correo } });
+    const newEmail = req.body.email || req.body.correo;
+    if (newEmail && newEmail !== user.email) {
+      const usuarioExiste = await User.findOne({ where: { email: newEmail } });
       if (usuarioExiste) {
         res.status(400);
         return next(new Error('Este correo ya está registrado por otro usuario'));
       }
-      user.correo = req.body.correo;
+      user.email = newEmail;
     }
 
-    if (req.body.contrasena) {
-      user.contrasena = req.body.contrasena; // El hook de User la encriptará
+    user.nombre = req.body.nombre || user.nombre;
+    user.apellido = req.body.apellido !== undefined ? req.body.apellido : user.apellido;
+    user.rol = req.body.rol || user.rol;
+    user.telefono = req.body.telefono !== undefined ? req.body.telefono : user.telefono;
+    user.recibePromos = req.body.recibePromos !== undefined ? req.body.recibePromos : user.recibePromos;
+
+    const newPassword = req.body.password || req.body.contrasena;
+    if (newPassword) {
+      user.password = newPassword; // Hook hashes it
     }
 
     const usuarioActualizado = await user.save();
     res.json({
       id: usuarioActualizado.id,
-      correo: usuarioActualizado.correo,
+      nombre: usuarioActualizado.nombre,
+      apellido: usuarioActualizado.apellido,
+      email: usuarioActualizado.email,
+      rol: usuarioActualizado.rol,
+      telefono: usuarioActualizado.telefono,
+      recibePromos: usuarioActualizado.recibePromos,
       createdAt: usuarioActualizado.createdAt,
       updatedAt: usuarioActualizado.updatedAt
     });
