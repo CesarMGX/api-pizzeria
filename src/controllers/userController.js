@@ -8,7 +8,7 @@ import User from '../models/User.js';
  *       type: object
  *       required:
  *         - nombre
- *         - email
+ *         - correo
  *       properties:
  *         id:
  *           type: string
@@ -21,11 +21,11 @@ import User from '../models/User.js';
  *         apellido:
  *           type: string
  *           example: Morales
- *         email:
+ *         correo:
  *           type: string
  *           format: email
  *           description: Correo electrónico único del usuario
- *           example: adandejesus200420@gmail.com
+ *           example: admin@planetpizza.com
  *         rol:
  *           type: string
  *           example: admin
@@ -64,7 +64,19 @@ export const getUsers = async (req, res) => {
     const users = await User.findAll({
       attributes: ['id', 'nombre', 'apellido', 'email', 'rol', 'telefono', 'recibePromos', 'createdAt', 'updatedAt']
     });
-    res.json(users);
+    // Formatear respuesta mapeando email -> correo
+    const formattedUsers = users.map(user => ({
+      id: user.id,
+      nombre: user.nombre,
+      apellido: user.apellido,
+      correo: user.email,
+      rol: user.rol,
+      telefono: user.telefono,
+      recibePromos: user.recibePromos,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    }));
+    res.json(formattedUsers);
   } catch (error) {
     res.status(500).json({ message: 'Error al obtener los usuarios', error: error.message });
   }
@@ -107,7 +119,17 @@ export const getUserById = async (req, res) => {
       attributes: ['id', 'nombre', 'apellido', 'email', 'rol', 'telefono', 'recibePromos', 'createdAt', 'updatedAt']
     });
     if (user) {
-      res.json(user);
+      res.json({
+        id: user.id,
+        nombre: user.nombre,
+        apellido: user.apellido,
+        correo: user.email,
+        rol: user.rol,
+        telefono: user.telefono,
+        recibePromos: user.recibePromos,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      });
     } else {
       res.status(404).json({ message: 'Usuario no encontrado' });
     }
@@ -132,8 +154,8 @@ export const getUserById = async (req, res) => {
  *             type: object
  *             required:
  *               - nombre
- *               - email
- *               - password
+ *               - correo
+ *               - contrasena
  *             properties:
  *               nombre:
  *                 type: string
@@ -141,13 +163,13 @@ export const getUserById = async (req, res) => {
  *               apellido:
  *                 type: string
  *                 example: Morales
- *               email:
+ *               correo:
  *                 type: string
  *                 format: email
- *                 example: adandejesus200420@gmail.com
- *               password:
+ *                 example: admin@planetpizza.com
+ *               contrasena:
  *                 type: string
- *                 example: a1b2c3d4e5f6
+ *                 example: pizzaplaneta123921_xdd
  *               rol:
  *                 type: string
  *                 example: admin
@@ -170,16 +192,15 @@ export const getUserById = async (req, res) => {
  *         description: No autorizado
  */
 export const createUser = async (req, res, next) => {
-  const { nombre, apellido, email, password, rol, telefono, recibePromos } = req.body;
+  const { nombre, apellido, correo, contrasena, email, password, rol, telefono, recibePromos } = req.body;
 
-  // Soporte de fallback de compatibilidad
-  const finalEmail = email || req.body.correo;
-  const finalPassword = password || req.body.contrasena;
+  const finalEmail = correo || email;
+  const finalPassword = contrasena || password;
   const finalNombre = nombre || 'Usuario';
 
   if (!finalEmail || !finalPassword) {
     res.status(400);
-    return next(new Error('Por favor, proporciona un email y una contraseña'));
+    return next(new Error('Por favor, proporciona un correo y una contraseña'));
   }
 
   try {
@@ -203,7 +224,7 @@ export const createUser = async (req, res, next) => {
       id: user.id,
       nombre: user.nombre,
       apellido: user.apellido,
-      email: user.email,
+      correo: user.email,
       rol: user.rol,
       telefono: user.telefono,
       recibePromos: user.recibePromos,
@@ -246,11 +267,11 @@ export const createUser = async (req, res, next) => {
  *               apellido:
  *                 type: string
  *                 example: Morales
- *               email:
+ *               correo:
  *                 type: string
  *                 format: email
- *                 example: adandejesus_nuevo@gmail.com
- *               password:
+ *                 example: admin_nuevo@planetpizza.com
+ *               contrasena:
  *                 type: string
  *                 description: Nueva contraseña de acceso si se desea cambiar
  *                 example: nuevacontrasena123
@@ -285,7 +306,7 @@ export const updateUser = async (req, res, next) => {
       return next(new Error('Usuario no encontrado'));
     }
 
-    const newEmail = req.body.email || req.body.correo;
+    const newEmail = req.body.correo || req.body.email;
     if (newEmail && newEmail !== user.email) {
       const usuarioExiste = await User.findOne({ where: { email: newEmail } });
       if (usuarioExiste) {
@@ -301,7 +322,7 @@ export const updateUser = async (req, res, next) => {
     user.telefono = req.body.telefono !== undefined ? req.body.telefono : user.telefono;
     user.recibePromos = req.body.recibePromos !== undefined ? req.body.recibePromos : user.recibePromos;
 
-    const newPassword = req.body.password || req.body.contrasena;
+    const newPassword = req.body.contrasena || req.body.password;
     if (newPassword) {
       user.password = newPassword; // Hook hashes it
     }
@@ -311,7 +332,7 @@ export const updateUser = async (req, res, next) => {
       id: usuarioActualizado.id,
       nombre: usuarioActualizado.nombre,
       apellido: usuarioActualizado.apellido,
-      email: usuarioActualizado.email,
+      correo: usuarioActualizado.email,
       rol: usuarioActualizado.rol,
       telefono: usuarioActualizado.telefono,
       recibePromos: usuarioActualizado.recibePromos,

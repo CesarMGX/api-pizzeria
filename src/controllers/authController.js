@@ -16,8 +16,8 @@ import User from '../models/User.js';
  *             type: object
  *             required:
  *               - nombre
- *               - email
- *               - password
+ *               - correo
+ *               - contrasena
  *             properties:
  *               nombre:
  *                 type: string
@@ -25,15 +25,15 @@ import User from '../models/User.js';
  *               apellido:
  *                 type: string
  *                 example: Morales
- *               email:
+ *               correo:
  *                 type: string
  *                 format: email
  *                 description: Correo electrónico único
- *                 example: adandejesus200420@gmail.com
- *               password:
+ *                 example: admin@planetpizza.com
+ *               contrasena:
  *                 type: string
  *                 description: Contraseña de acceso
- *                 example: a1b2c3d4e5f6
+ *                 example: pizzaplaneta123921_xdd
  *               rol:
  *                 type: string
  *                 enum: [admin, cliente, empleado]
@@ -61,7 +61,7 @@ import User from '../models/User.js';
  *                       type: string
  *                     nombre:
  *                       type: string
- *                     email:
+ *                     correo:
  *                       type: string
  *                     rol:
  *                       type: string
@@ -69,16 +69,15 @@ import User from '../models/User.js';
  *         description: El correo ya está registrado o faltan datos
  */
 export const register = async (req, res, next) => {
-  const { nombre, apellido, email, password, rol, telefono, recibePromos } = req.body;
+  const { nombre, apellido, correo, contrasena, email, password, rol, telefono, recibePromos } = req.body;
 
-  // Soporte temporal de compatibilidad para request antiguos
-  const finalEmail = email || req.body.correo;
-  const finalPassword = password || req.body.contrasena;
+  const finalEmail = correo || email;
+  const finalPassword = contrasena || password;
   const finalNombre = nombre || 'Usuario';
 
   if (!finalEmail || !finalPassword) {
     res.status(400);
-    return next(new Error('Por favor, proporciona un email/correo y una contraseña'));
+    return next(new Error('Por favor, proporciona un correo y una contraseña'));
   }
 
   try {
@@ -103,7 +102,7 @@ export const register = async (req, res, next) => {
       user: {
         id: user.id,
         nombre: user.nombre,
-        email: user.email,
+        correo: user.email,
         rol: user.rol
       },
     });
@@ -127,18 +126,18 @@ export const register = async (req, res, next) => {
  *           schema:
  *             type: object
  *             required:
- *               - email
- *               - password
+ *               - correo
+ *               - contrasena
  *             properties:
- *               email:
+ *               correo:
  *                 type: string
  *                 format: email
  *                 description: Correo electrónico del usuario
- *                 example: adandejesus200420@gmail.com
- *               password:
+ *                 example: admin@planetpizza.com
+ *               contrasena:
  *                 type: string
  *                 description: Contraseña de acceso
- *                 example: a1b2c3d4e5f6
+ *                 example: pizzaplaneta123921_xdd
  *     responses:
  *       200:
  *         description: Autenticación exitosa, retorna el token JWT
@@ -157,11 +156,10 @@ export const register = async (req, res, next) => {
  *         description: Credenciales incorrectas
  */
 export const login = async (req, res, next) => {
-  const { email, password } = req.body;
+  const { correo, contrasena, email, password } = req.body;
 
-  // Soporte temporal de compatibilidad para request antiguos
-  const finalEmail = email || req.body.correo;
-  const finalPassword = password || req.body.contrasena;
+  const finalEmail = correo || email;
+  const finalPassword = contrasena || password;
 
   if (!finalEmail || !finalPassword) {
     res.status(400);
@@ -174,7 +172,7 @@ export const login = async (req, res, next) => {
     if (user && (await user.validarContrasena(finalPassword))) {
       // Generar Token JWT
       const token = jwt.sign(
-        { id: user.id, email: user.email, nombre: user.nombre, rol: user.rol },
+        { id: user.id, correo: user.email, nombre: user.nombre, rol: user.rol },
         process.env.JWT_SECRET,
         { expiresIn: '24h' }
       );
