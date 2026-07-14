@@ -36,6 +36,19 @@ const Order = sequelize.define('Order', {
     allowNull: false,
     defaultValue: 'pending',
   },
+  metodoPago: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    defaultValue: 'Efectivo',
+  },
+  nombreCliente: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+  },
+  emailCliente: {
+    type: DataTypes.STRING(150),
+    allowNull: true,
+  },
   paymentId: {
     type: DataTypes.STRING(100),
     allowNull: true,

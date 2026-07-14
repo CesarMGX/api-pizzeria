@@ -4,8 +4,10 @@ import {
   getOrderById,
   createOrder,
   updateOrderStatus,
+  updateOrder,
   deleteOrder,
   clearAllOrders,
+  getOrderComprobante,
 } from '../controllers/orderController.js';
 
 const router = express.Router();
@@ -19,9 +21,13 @@ router.route('/clear')
 
 router.route('/:id')
   .get(getOrderById)
+  .put(updateOrder)
   .delete(deleteOrder);
 
 router.route('/:id/status')
   .put(updateOrderStatus);
+
+router.route('/:id/comprobante')
+  .get(getOrderComprobante);
 
 export default router;

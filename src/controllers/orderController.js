@@ -147,6 +147,17 @@ export const getOrderById = async (req, res) => {
  *               total:
  *                 type: number
  *                 example: 398
+ *               metodoPago:
+ *                 type: string
+ *                 enum: [Efectivo, MercadoPago]
+ *                 example: Efectivo
+ *               nombreCliente:
+ *                 type: string
+ *                 example: adán de Jesús
+ *               emailCliente:
+ *                 type: string
+ *                 format: email
+ *                 example: test_user@testuser.com
  *     responses:
  *       201:
  *         description: Orden creada exitosamente
@@ -159,7 +170,7 @@ export const getOrderById = async (req, res) => {
  */
 export const createOrder = async (req, res) => {
   try {
-    const { items, total } = req.body;
+    const { items, total, metodoPago, nombreCliente, emailCliente } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ message: 'La orden debe contener al menos un producto' });
@@ -185,6 +196,9 @@ export const createOrder = async (req, res) => {
       time,
       status: 'Pendiente',
       paymentStatus: 'pending',
+      metodoPago: metodoPago || 'Efectivo',
+      nombreCliente: nombreCliente || null,
+      emailCliente: emailCliente || null,
     });
 
     res.status(201).json(order);
@@ -262,6 +276,223 @@ export const updateOrderStatus = async (req, res) => {
 
 /**
  * @swagger
+ * /api/orders/{id}:
+ *   put:
+ *     summary: Actualizar una orden por completo
+ *     tags: [Órdenes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: ID de la orden
+ *         example: 550e8400-e29b-41d4-a716-446655440000
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [Pendiente, Preparando, Listo, Entregado]
+ *                 example: Preparando
+ *               paymentStatus:
+ *                 type: string
+ *                 example: approved
+ *               metodoPago:
+ *                 type: string
+ *                 enum: [Efectivo, MercadoPago]
+ *                 example: MercadoPago
+ *               nombreCliente:
+ *                 type: string
+ *                 example: adán de Jesús
+ *               emailCliente:
+ *                 type: string
+ *                 format: email
+ *                 example: test_user@testuser.com
+ *     responses:
+ *       200:
+ *         description: Orden actualizada correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: Error en los datos proporcionados
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Orden no encontrada
+ */
+export const updateOrder = async (req, res) => {
+  try {
+    const order = await Order.findByPk(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: 'Orden no encontrada' });
+    }
+
+    order.status = req.body.status || order.status;
+    order.paymentStatus = req.body.paymentStatus || order.paymentStatus;
+    order.metodoPago = req.body.metodoPago || order.metodoPago;
+    order.nombreCliente = req.body.nombreCliente || order.nombreCliente;
+    order.emailCliente = req.body.emailCliente || order.emailCliente;
+    
+    if (req.body.total !== undefined) {
+      order.total = req.body.total;
+    }
+    if (req.body.items) {
+      order.items = req.body.items;
+    }
+
+    const orderActualizada = await order.save();
+    res.json(orderActualizada);
+  } catch (error) {
+    res.status(400).json({ message: 'Error al actualizar la orden', error: error.message });
+  }
+};
+
+/**
+ * @swagger
+ * /api/orders/{id}/comprobante:
+ *   get:
+ *     summary: Obtener los datos formateados del comprobante/ticket de pago
+ *     tags: [Órdenes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: ID de la orden
+ *         example: 550e8400-e29b-41d4-a716-446655440000
+ *     responses:
+ *       200:
+ *         description: Datos estructurados del comprobante para visualización
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 fecha:
+ *                   type: string
+ *                   example: "Lunes, 13 de julio 2026, 15:44:25"
+ *                 total:
+ *                   type: number
+ *                   example: 253.00
+ *                 titulo:
+ *                   type: string
+ *                   example: "Pizza Pizza Vegetariana - Familiar (Extras: Champiñones, Cebolla)"
+ *                 formaPago:
+ *                   type: string
+ *                   example: "Dinero en mi cuenta de MercadoPago"
+ *                 transaccion:
+ *                   type: string
+ *                   example: "168656938630"
+ *                 cliente:
+ *                   type: object
+ *                   properties:
+ *                     nombre:
+ *                       type: string
+ *                       example: "Test Test"
+ *                     email:
+ *                       type: string
+ *                       example: "test_user_7841552200297713870@testuser.com"
+ *                 qrData:
+ *                   type: string
+ *                   example: "https://api-pizzeria-production.up.railway.app/api/orders/550e8400-e29b-41d4-a716-446655440000"
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Orden no encontrada
+ *       500:
+ *         description: Error en el servidor
+ */
+export const getOrderComprobante = async (req, res) => {
+  try {
+    const order = await Order.findByPk(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: 'Orden no encontrada' });
+    }
+
+    // Formatear fecha
+    const d = new Date(Number(order.timestamp) || Date.now());
+    const formatOptions = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    };
+    let fecha = d.toLocaleDateString('es-ES', formatOptions);
+    fecha = fecha.charAt(0).toUpperCase() + fecha.slice(1);
+
+    // Formatear título
+    let titulo = '';
+    if (order.items && order.items.length > 0) {
+      const firstItem = order.items[0];
+      const pizzaNombre = firstItem.pizza?.nombre || firstItem.nombre || 'Personalizada';
+      const sizeNombre = firstItem.size?.nombre || firstItem.tamano || 'Familiar';
+      
+      let extrasText = '';
+      if (firstItem.extras && firstItem.extras.length > 0) {
+        const names = firstItem.extras.map(e => typeof e === 'object' ? (e.nombre || e) : e);
+        extrasText = ` (Extras: ${names.join(', ')})`;
+      }
+      
+      titulo = `Pizza ${pizzaNombre} - ${sizeNombre}${extrasText}`;
+      if (order.items.length > 1) {
+        titulo += ` (+ ${order.items.length - 1} producto(s) más)`;
+      }
+    } else {
+      titulo = 'Compra en Planet Pizza';
+    }
+
+    // Forma de Pago
+    const formaPago = order.metodoPago === 'MercadoPago'
+      ? 'Dinero en mi cuenta de MercadoPago'
+      : 'Pago en Caja (Efectivo)';
+
+    // Transacción
+    const transaccion = order.paymentId || order.orderNumber;
+
+    // Cliente
+    const cliente = {
+      nombre: order.nombreCliente || 'Test Test',
+      email: order.emailCliente || 'test_user_7841552200297713870@testuser.com'
+    };
+
+    // QR Data
+    const qrData = `https://api-pizzeria-production.up.railway.app/api/orders/${order.id}`;
+
+    res.json({
+      fecha,
+      total: order.total,
+      titulo,
+      formaPago,
+      transaccion,
+      cliente,
+      qrData
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al generar el comprobante', error: error.message });
+  }
+};
+
+/**
+ * @swagger
+
  * /api/orders/{id}:
  *   delete:
  *     summary: Cancelar y eliminar una orden por ID
