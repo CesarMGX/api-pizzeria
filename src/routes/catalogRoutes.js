@@ -9,26 +9,25 @@ import {
   updateIngredient,
   deleteIngredient,
 } from '../controllers/catalogController.js';
-import { protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
 // Rutas para Tamaños (Sizes)
 router.route('/sizes')
   .get(getSizes)
-  .post(protect, createSize);
+  .post(createSize);
 
 router.route('/sizes/:id')
-  .put(protect, updateSize)
-  .delete(protect, deleteSize);
+  .put(updateSize)
+  .delete(deleteSize);
 
 // Rutas para Ingredientes
 router.route('/ingredients')
   .get(getIngredients)
-  .post(protect, createIngredient);
+  .post(createIngredient);
 
 router.route('/ingredients/:id')
-  .put(protect, updateIngredient)
-  .delete(protect, deleteIngredient);
+  .put(updateIngredient)
+  .delete(deleteIngredient);
 
 export default router;

@@ -11,7 +11,7 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import promoRoutes from './routes/promoRoutes.js';
 import userRoutes from './routes/userRoutes.js';
-import { protect } from './middlewares/authMiddleware.js';
+
 
 
 // Swagger

@@ -18,21 +18,6 @@ const options = {
         description: 'Servidor de Desarrollo Local',
       },
     ],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-          description: 'Introduce el token JWT obtenido del login para acceder a los endpoints protegidos.',
-        },
-      },
-    },
-    security: [
-      {
-        bearerAuth: [],
-      },
-    ],
   },
   apis: ['./src/routes/*.js', './src/controllers/*.js', './src/app.js'], // Buscar anotaciones en rutas y controladores
 };
