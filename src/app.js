@@ -41,7 +41,7 @@ app.use('/api/catalog', catalogRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/promos', promoRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/upload', protect, uploadRoutes);
+app.use('/api/upload', uploadRoutes);
 app.use('/api/payments', paymentRoutes);
 
 // Middleware para rutas no encontradas (404)
