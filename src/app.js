@@ -34,13 +34,13 @@ app.get('/', (req, res) => {
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/auth', authRoutes);
-app.use('/api/pizzas', pizzaRoutes);
-app.use('/api/catalog', catalogRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/promos', promoRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/pizzas', protect, pizzaRoutes);
+app.use('/api/catalog', protect, catalogRoutes);
+app.use('/api/orders', protect, orderRoutes);
+app.use('/api/promos', protect, promoRoutes);
+app.use('/api/users', protect, userRoutes);
 app.use('/api/upload', protect, uploadRoutes);
-app.use('/api/payments', paymentRoutes);
+app.use('/api/payments', protect, paymentRoutes);
 
 // Middleware para rutas no encontradas (404)
 app.use((req, res, next) => {

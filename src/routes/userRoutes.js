@@ -6,7 +6,6 @@ import {
   updateUser,
   deleteUser,
 } from '../controllers/userController.js';
-import { protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -16,7 +15,7 @@ router.route('/')
 
 router.route('/:id')
   .get(getUserById)
-  .put(protect, updateUser)
-  .delete(protect, deleteUser);
+  .put(updateUser)
+  .delete(deleteUser);
 
 export default router;

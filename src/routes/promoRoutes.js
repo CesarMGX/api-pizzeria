@@ -6,17 +6,16 @@ import {
   updatePromo,
   deletePromo,
 } from '../controllers/promoController.js';
-import { protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
 router.route('/')
   .get(getPromos)
-  .post(protect, createPromo);
+  .post(createPromo);
 
 router.route('/:id')
   .get(getPromoById)
-  .put(protect, updatePromo)
-  .delete(protect, deletePromo);
+  .put(updatePromo)
+  .delete(deletePromo);
 
 export default router;

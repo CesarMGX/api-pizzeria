@@ -9,7 +9,6 @@ import {
   clearAllOrders,
   getOrderComprobante,
 } from '../controllers/orderController.js';
-import { protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -18,15 +17,15 @@ router.route('/')
   .post(createOrder);
 
 router.route('/clear')
-  .post(protect, clearAllOrders);
+  .post(clearAllOrders);
 
 router.route('/:id')
   .get(getOrderById)
-  .put(protect, updateOrder)
-  .delete(protect, deleteOrder);
+  .put(updateOrder)
+  .delete(deleteOrder);
 
 router.route('/:id/status')
-  .put(protect, updateOrderStatus);
+  .put(updateOrderStatus);
 
 router.route('/:id/comprobante')
   .get(getOrderComprobante);

@@ -24,7 +24,7 @@ const options = {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-          description: 'Introduce la contraseña del .env (pizzaplaneta123921_xdd) como token para acceder.',
+          description: 'Introduce la contraseña para acceder a la documentación',
         },
       },
     },
