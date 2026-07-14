@@ -18,6 +18,21 @@ const options = {
         description: 'Servidor de Desarrollo Local',
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: 'Introduce la contraseña del .env (pizzaplaneta123921_xdd) como token para acceder.',
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
   },
   apis: ['./src/routes/*.js', './src/controllers/*.js', './src/app.js'], // Buscar anotaciones en rutas y controladores
 };

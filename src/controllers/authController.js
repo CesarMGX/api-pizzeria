@@ -112,49 +112,6 @@ export const register = async (req, res, next) => {
   }
 };
 
-/**
- * @swagger
- * /api/auth/login:
- *   post:
- *     summary: Iniciar sesión para obtener un token JWT
- *     tags: [Autenticación]
- *     security: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - correo
- *               - contrasena
- *             properties:
- *               correo:
- *                 type: string
- *                 format: email
- *                 description: Correo electrónico del usuario
- *                 example: adandejesus200420@gmail.com
- *               contrasena:
- *                 type: string
- *                 description: Contraseña de acceso
- *                 example: pizzaplaneta123921_xdd
- *     responses:
- *       200:
- *         description: Autenticación exitosa, retorna el token JWT
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 token:
- *                   type: string
- *       400:
- *         description: Solicitud incorrecta (falta correo o contraseña)
- *       401:
- *         description: Credenciales incorrectas
- */
 export const login = async (req, res, next) => {
   const { correo, contrasena, email, password } = req.body;
 
