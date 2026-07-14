@@ -181,7 +181,15 @@ export const createPromo = async (req, res) => {
       return res.status(400).json({ message: 'La pizza base especificada no existe' });
     }
 
-    const promo = await Promo.create({ id, nombre, descripcion, precio, imagen, badge, pizzaBaseId });
+    // Auto-generar ID tipo slug si no viene en el body
+    const finalId = id || nombre
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+
+    const promo = await Promo.create({ id: finalId, nombre, descripcion, precio, imagen, badge, pizzaBaseId });
     res.status(201).json(promo);
   } catch (error) {
     res.status(400).json({ message: 'Error al crear la promoción', error: error.message });
