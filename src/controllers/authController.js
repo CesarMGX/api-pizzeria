@@ -29,7 +29,7 @@ import User from '../models/User.js';
  *                 type: string
  *                 format: email
  *                 description: Correo electrónico único
- *                 example: admin@planetpizza.com
+ *                 example: adandejesus200420@gmail.com
  *               contrasena:
  *                 type: string
  *                 description: Contraseña de acceso
@@ -133,7 +133,7 @@ export const register = async (req, res, next) => {
  *                 type: string
  *                 format: email
  *                 description: Correo electrónico del usuario
- *                 example: admin@planetpizza.com
+ *                 example: adandejesus200420@gmail.com
  *               contrasena:
  *                 type: string
  *                 description: Contraseña de acceso

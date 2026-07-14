@@ -25,7 +25,7 @@ import User from '../models/User.js';
  *           type: string
  *           format: email
  *           description: Correo electrónico único del usuario
- *           example: admin@planetpizza.com
+ *           example: adandejesus200420@gmail.com
  *         rol:
  *           type: string
  *           example: admin
@@ -166,7 +166,7 @@ export const getUserById = async (req, res) => {
  *               correo:
  *                 type: string
  *                 format: email
- *                 example: admin@planetpizza.com
+ *                 example: adandejesus200420@gmail.com
  *               contrasena:
  *                 type: string
  *                 example: pizzaplaneta123921_xdd
