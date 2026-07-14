@@ -1,6 +1,17 @@
 import jwt from 'jsonwebtoken';
 
 export const protect = (req, res, next) => {
+  // Comprobar si la petición proviene de la documentación de Swagger
+  const referer = req.headers.referer || '';
+  const isSwagger = referer.includes('/api-docs');
+
+  // Si NO viene de Swagger (es decir, viene del sitio web en Vercel, localhost, etc.),
+  // permitimos el acceso libre sin necesidad de token para evitar errores 401.
+  if (!isSwagger) {
+    return next();
+  }
+
+  // Si SÍ viene de Swagger, exigimos la contraseña/token para simular la seguridad
   let token;
 
   if (
@@ -8,21 +19,17 @@ export const protect = (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     try {
-      // Obtener el token del encabezado (Bearer <token>)
       token = req.headers.authorization.split(' ')[1];
 
-      // Comprobar si es el token/contraseña estática por defecto
+      // Permitir la contraseña estática del .env como token
       if (token === process.env.JWT_SECRET || token === 'pizzaplaneta123921_xdd') {
         req.user = { id: 'admin-bypass-id', correo: 'adandejesus200420@gmail.com', nombre: 'Adán de Jesús', rol: 'admin' };
         return next();
       }
 
-      // Verificar el token
+      // Verificar si es un JWT normal
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // Guardar los datos decodificados en el objeto request
       req.user = decoded;
-
       return next();
     } catch (error) {
       res.status(401);
@@ -32,6 +39,6 @@ export const protect = (req, res, next) => {
 
   if (!token) {
     res.status(401);
-    return next(new Error('No autorizado, no se proporcionó ningún token'));
+    return next(new Error('No autorizado, debes autenticarte en Swagger usando el botón Authorize con tu contraseña'));
   }
 };
